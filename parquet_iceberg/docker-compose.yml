@@ -1,0 +1,72 @@
+services:
+  spark-iceberg:
+    image: tabulario/spark-iceberg
+    container_name: spark-iceberg
+    depends_on:
+      - rest
+      - minio
+    networks:
+      iceberg_net:
+    volumes:
+      - ./warehouse:/home/iceberg/warehouse
+      - ./notebooks:/home/iceberg/notebooks/notebooks
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+    ports:
+      - 8888:8888   # Jupyter Notebook
+      - 8080:8080   # Spark Master UI
+      - 10000:10000 # Thrift / JDBC
+      - 10001:10001
+
+  rest:
+    image: apache/iceberg-rest-fixture
+    container_name: iceberg-rest
+    networks:
+      iceberg_net:
+    ports:
+      - 8181:8181
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - CATALOG_WAREHOUSE=s3://warehouse/
+      - CATALOG_IO__IMPL=org.apache.iceberg.aws.s3.S3FileIO
+      - CATALOG_S3_ENDPOINT=http://minio:9000
+
+  minio:
+    image: ghcr.io/coollabsio/minio
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+      - MINIO_DOMAIN=minio
+    networks:
+      iceberg_net:
+        aliases:
+          - warehouse.minio
+    ports:
+      - 9001:9001   # konsola MinIO
+      - 9000:9000   # S3 API
+    command: ["server", "/data", "--console-address", ":9001"]
+
+  create-bucket:
+    image: amazon/aws-cli
+    container_name: create-bucket
+    depends_on:
+      - minio
+    networks:
+      iceberg_net:
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+    entrypoint: >
+      /bin/sh -c "
+      until aws --endpoint-url http://minio:9000 s3api head-bucket --bucket warehouse
+      || aws --endpoint-url http://minio:9000 s3 mb s3://warehouse;
+      do echo 'czekam na minio...'; sleep 2; done"
+
+networks:
+  iceberg_net:
