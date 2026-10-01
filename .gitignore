@@ -222,9 +222,8 @@ __marimo__/
 # Apache Iceberg & Spark Data
 # -----------------------------
 # Ignorujemy wszystko w folderze warehouse (wygenerowane CSV, Parquet, metadane Iceberga, katalogi)
-warehouse/*
-# ALE zostawiamy plik .gitkeep, żeby Git śledził sam pusty folder warehouse
-!warehouse/.gitkeep
+**/warehouse/*
+!**/warehouse/.gitkeep
 
 # -----------------------------
 # Jupyter Notebook
