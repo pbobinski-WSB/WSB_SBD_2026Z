@@ -216,3 +216,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# -----------------------------
+# Apache Iceberg & Spark Data
+# -----------------------------
+# Ignorujemy wszystko w folderze warehouse (wygenerowane CSV, Parquet, metadane Iceberga, katalogi)
+warehouse/*
+# ALE zostawiamy plik .gitkeep, żeby Git śledził sam pusty folder warehouse
+!warehouse/.gitkeep
+
+# -----------------------------
+# Jupyter Notebook
+# -----------------------------
+# Ignorujemy ukryte foldery, które Jupyter tworzy do autozapisu
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# -----------------------------
+# System operacyjny i Python
+# -----------------------------
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
