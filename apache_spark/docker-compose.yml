@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  spark-demo:
+    image: tabulario/spark-iceberg:latest
+    container_name: demo-spark
+    ports:
+      - "8888:8888"   # Port dla interfejsu przeglądarki Jupyter Notebook
+      - "8080:8080"   # Port dla Spark UI (podgląd zadań Sparka w przeglądarce)
+      - "4040-4045:4040-4045"  # SPARK APPLICATION UI
+    environment:
+      - SPARK_HOME=/opt/spark
+    volumes:
+      # 1. Mapujemy lokalny folder 'notebooks' do Jupytera (Twój kod przetrwa restarty)
+      - ./notebooks:/home/iceberg/notebooks/local_demo
+      
+      # 2. Mapujemy lokalny folder 'warehouse' jako fizyczny dysk dla naszej bazy Iceberg
+      - ./warehouse:/home/iceberg/warehouse    
+      
