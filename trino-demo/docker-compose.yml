@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # 1. Baza transakcyjna (udaje system CRM na produkcji)
+  postgres_db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: firmadb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: sekret
+    ports:
+      - "5432:5432"
+
+  # 2. Silnik Trino (system analityczny)
+  trino:
+    image: trinodb/trino:latest
+    ports:
+      - "8080:8080" # Trino UI
+    volumes:
+      # Podpinamy konfigurację Postgresa jako nowy "Katalog" w Trino
+      - ./catalogs/postgres.properties:/etc/trino/catalog/postgres.properties
+
+  # 3. Jupyter
+  jupyter:
+    image: jupyter/scipy-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    command: start-notebook.sh --ServerApp.token='' --ServerApp.password=''
